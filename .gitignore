@@ -1,0 +1,22 @@
+# Secrets
+.env
+.env.local
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+
+# Node / Next.js
+node_modules/
+.next/
+next-env.d.ts
+*.tsbuildinfo
+
+# Local tooling
+.claude/
+
+# Personal / assignment files (not part of the app)
+test-human.m4a
+Gnani - Internship Task.pdf

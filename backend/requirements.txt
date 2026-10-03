@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+sqlalchemy>=2.0
+psycopg[binary]>=3.2
+alembic
+pydantic-settings
+boto3
+httpx
+google-genai
+imageio-ffmpeg
+truststore
+python-dotenv
