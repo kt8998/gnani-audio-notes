@@ -75,7 +75,7 @@ export default function UploadCard() {
         ) : (
           <>
             <strong>Drop an audio file here, or click to browse</strong>
-            <div className="muted small">MP3, WAV, M4A, OGG, FLAC, AAC, WEBM · any length</div>
+            <div className="muted small">MP3, WAV, M4A, OGG, FLAC, AAC, WEBM · up to 50 MB (about 50 min of MP3)</div>
           </>
         )}
       </div>

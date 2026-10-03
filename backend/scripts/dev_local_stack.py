@@ -2,7 +2,7 @@
 Local development stack in one process: S3 stand-in (moto) + FastAPI API + worker.
 Uses the real DATABASE_URL, Gnani and Gemini keys from backend/.env.
 
-If S3_ENDPOINT_URL is set in .env (real R2), the stand-in is skipped and R2 is used.
+If S3_ENDPOINT_URL is set in .env (Supabase Storage), the stand-in is skipped and the real bucket is used.
 
     python scripts/dev_local_stack.py      # API on http://localhost:8000
 """

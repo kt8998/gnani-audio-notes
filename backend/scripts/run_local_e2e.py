@@ -3,7 +3,7 @@ Live end-to-end run of the real backend on one audio file:
     API create -> PUT to storage -> API confirm -> worker -> real Gnani -> real Gemini
 
 Uses DATABASE_URL, GNANI_API_KEY and GEMINI_API_KEY from backend/.env.
-If S3_ENDPOINT_URL is empty (R2 not set up yet), a local S3-compatible server
+If S3_ENDPOINT_URL is empty (no real bucket configured), a local S3-compatible server
 (moto) is started as a stand-in, and the script says so.
 
 Usage (from backend/):
@@ -59,7 +59,7 @@ def main() -> int:
     path = Path(args.audio).resolve()
 
     local_s3 = start_local_s3_if_needed()
-    print("storage:", "LOCAL S3 STAND-IN (moto), not R2" if local_s3 else "configured bucket (S3_ENDPOINT_URL)")
+    print("storage:", "LOCAL S3 STAND-IN (moto), not the real bucket" if local_s3 else "configured bucket (S3_ENDPOINT_URL)")
 
     import httpx
     from alembic import command

@@ -24,14 +24,15 @@ class Settings(BaseSettings):
     s3_access_key_id: str = ""
     s3_secret_access_key: str = ""
     s3_bucket: str = "audio-notes"
-    s3_region: str = "auto"
+    s3_region: str = "us-east-1"  # Supabase: set to the project's region (part of the request signature)
 
     gemini_api_key: str = ""
     gemini_model: str = "gemini-3.8-flash"
 
     cors_origins: str = "http://localhost:3000"
 
-    max_upload_mb: int = 500
+    # Supabase Storage free plan: max 50 MB per object. Reject bigger files up front.
+    max_upload_mb: int = 50
     # Gnani rejects audio longer than 30s (verified against the live API), so stay well under it.
     chunk_seconds: int = 25
     transcribe_concurrency: int = 3

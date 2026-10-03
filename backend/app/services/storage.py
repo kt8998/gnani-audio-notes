@@ -1,5 +1,6 @@
 """
-Object storage (Cloudflare R2, or any S3-compatible bucket) via boto3.
+Object storage via the S3 API (boto3). In production this is Supabase Storage's
+S3-compatible endpoint; any S3-compatible bucket works.
 
 The browser uploads directly to the bucket with a short-lived *presigned* URL,
 so large files never pass through our API server. The worker downloads with
@@ -28,7 +29,9 @@ def get_client():
         aws_access_key_id=s.s3_access_key_id,
         aws_secret_access_key=s.s3_secret_access_key,
         region_name=s.s3_region,
-        config=Config(signature_version="s3v4"),
+        # Path-style URLs (endpoint/bucket/key): Supabase's S3 endpoint requires them,
+        # and they work with every S3-compatible service.
+        config=Config(signature_version="s3v4", s3={"addressing_style": "path"}),
     )
 
 

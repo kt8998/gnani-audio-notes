@@ -4,7 +4,7 @@ Integration-test setup.
 * Database: a separate "<name>_test" database on the same Postgres server as
   DATABASE_URL, created automatically. Real Postgres, so FOR UPDATE SKIP LOCKED,
   constraints and migrations are exercised for real.
-* Storage: moto's local S3-compatible server stands in for Cloudflare R2, so
+* Storage: moto's local S3-compatible server stands in for Supabase Storage's S3 API, so
   presigned PUT URLs work over real HTTP.
 Environment variables are set here, before any app module reads its settings.
 """

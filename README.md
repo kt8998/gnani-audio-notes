@@ -6,14 +6,14 @@ Built for the Gnani internship take-home.
 - **Frontend:** Next.js (Vercel), in `frontend/`
 - **Backend:** FastAPI API + background worker (Railway), in `backend/`
 - **Database:** PostgreSQL (Railway), which also serves as the job queue
-- **Storage:** Cloudflare R2 (private bucket; the browser uploads via presigned URLs)
+- **Storage:** Supabase Storage, private bucket `audio-notes`, used through its S3-compatible API (the browser uploads via presigned URLs; 50 MB per file on the free plan)
 
 The live app's `/architecture` page explains the design: the upload → transcript flow, long-audio chunking,
 sync vs background work, failure handling and trade-offs.
 
 ## How it works (short version)
 
-1. The browser asks the API for a presigned URL, uploads the file **directly to R2** (with real progress), then confirms.
+1. The browser asks the API for a presigned URL, uploads the file **directly to the storage bucket** (with real progress), then confirms.
 2. The API marks the recording `queued`. A separate **worker** process claims it (`SELECT … FOR UPDATE SKIP LOCKED`).
 3. The worker decodes the audio with ffmpeg, splits it into **25 s chunks** (the live Gnani API rejects anything over 30 s),
    transcribes 3 chunks at a time with retries, joins the text, and asks Gemini for a summary.
@@ -53,7 +53,7 @@ live APIs. `scripts/gnani_smoke_test.py` and `scripts/run_local_e2e.py` call the
 | API | Railway, root `backend/`, Dockerfile | default command runs migrations, then uvicorn |
 | Worker | Railway, same repo/Dockerfile | start command: `python -m app.worker.run` |
 | Postgres | Railway | `DATABASE_URL` referenced from the Postgres service |
-| Storage | Cloudflare R2 | run `scripts/configure_r2_cors.py <frontend-origin>` once |
+| Storage | Supabase Storage | private bucket `audio-notes`; S3 connection enabled; S3 access key in the backend env |
 | Frontend | Vercel, root `frontend/` | `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_GITHUB_URL` |
 
 Backend env vars: see `backend/.env.example`. No secrets are ever sent to the browser.

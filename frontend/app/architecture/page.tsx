@@ -18,14 +18,14 @@ export default function Architecture() {
         <li><strong>API</strong>: FastAPI on Railway. Short, fast HTTP requests only.</li>
         <li><strong>Worker</strong>: a second process on Railway (same code, different start command) that does all the slow work.</li>
         <li><strong>PostgreSQL</strong> (Railway): recording metadata, processing status, per-chunk progress, transcripts and summaries. Also used as the job queue.</li>
-        <li><strong>Object storage</strong> (Cloudflare R2, private bucket): the original audio files. Audio never goes into the database.</li>
+        <li><strong>Object storage</strong> (Supabase Storage, private bucket <code>audio-notes</code>, used through its S3-compatible API): the original audio files. Audio never goes into the database.</li>
         <li><strong>Gnani speech-to-text</strong> (REST API) for transcription, and <strong>Google Gemini</strong> (<code>gemini-3.8-flash</code>) for the summary.</li>
       </ul>
 
       <h2>From upload to transcript</h2>
       <ol>
         <li>The browser asks the API to create a recording. The API validates the file type, size and language, inserts a row with status <code>uploading</code>, and returns a <strong>presigned upload URL</strong> valid for 15 minutes.</li>
-        <li>The browser uploads the file <strong>directly to R2</strong> with that URL (that&apos;s where the real upload percentage comes from). Large files never pass through our API server.</li>
+        <li>The browser uploads the file <strong>directly to the storage bucket</strong> with that URL (that&apos;s where the real upload percentage comes from). Files never pass through our API server.</li>
         <li>The browser tells the API the upload finished. The API checks the object exists in the bucket and its size matches, then sets the status to <code>queued</code>.</li>
         <li>The worker claims the oldest queued recording with <code>SELECT … FOR UPDATE SKIP LOCKED</code>, so two workers can never take the same job.</li>
         <li><code>preprocessing</code>: the worker downloads the file, and ffmpeg converts whatever was uploaded (mp3, m4a, …) to 16&nbsp;kHz mono WAV. A corrupt or non-audio file fails here with a clear message.</li>
@@ -43,6 +43,12 @@ export default function Architecture() {
         attempt count. That gives real progress, lets three chunks run in parallel, and means a retry only re-sends the chunks
         that failed. A silent chunk comes back from Gnani as an empty transcript, which counts as valid &ldquo;no speech&rdquo;, not an error.
         Very long transcripts are summarized in parts and the part summaries are then combined; nothing is silently cut off.
+      </p>
+      <p>
+        <strong>Size limit:</strong> uploads are capped at 50 MB, which is the per-file limit of Supabase Storage&apos;s free plan.
+        That is about 50 minutes of 128&nbsp;kbps MP3 (a 2-minute MP3 is about 2&nbsp;MB), but only about 4–5 minutes of
+        uncompressed 44.1&nbsp;kHz stereo WAV. Bigger files are rejected before upload, with a clear message.
+        The processing pipeline itself has no length limit.
       </p>
 
       <h2>What runs synchronously vs in the background</h2>
@@ -86,6 +92,7 @@ export default function Architecture() {
         <li>Push progress over Server-Sent Events instead of polling, and add structured logging and metrics (Gnani latency, retry rate).</li>
         <li>Detect the language automatically instead of asking the user, and add speaker labels.</li>
         <li>Use a paid LLM tier so user content isn&apos;t used for training, and add rate limiting on the upload endpoint.</li>
+        <li>Lift the 50 MB cap: a paid storage plan, or resumable/multipart uploads, or compressing audio in the browser before upload.</li>
       </ul>
     </article>
   );

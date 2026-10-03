@@ -36,7 +36,7 @@ def upload(api, path: Path, client_id=ME, language="en-IN", filename=None) -> uu
     )
     assert r.status_code == 201, r.text
     body = r.json()
-    put = httpx.put(body["upload_url"], content=data, headers=body["upload_headers"], timeout=60)  # straight to "R2"
+    put = httpx.put(body["upload_url"], content=data, headers=body["upload_headers"], timeout=60)  # straight to the bucket
     assert put.status_code == 200, put.text
     api.uploaded[body["recording"]["id"]] = data
     r = api.post(f"/api/recordings/{body['recording']['id']}/uploaded", headers={"X-Client-Id": client_id})
